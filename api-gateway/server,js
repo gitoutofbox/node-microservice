@@ -1,0 +1,35 @@
+const gateway = require('fast-gateway');
+
+const redirectMiddleware = (req, res, next) => {
+    let url = req.url;
+
+    if(url.substr(-1) !== '/') {
+        res.writeHead(302, {
+            'Location': url + '/'
+        })
+        res.end();
+        return;
+    }
+    next();
+}
+const server = gateway({
+    middlewares: [redirectMiddleware],
+    routes: [
+        {
+            prefix: '/users',
+            target: 'http://localhost:4002'
+        },
+        {
+            prefix: '/orders',
+            target: 'http://localhost:4001'
+        }
+    ]
+});
+
+server.get('/', (req, res) => {
+    res.send('API Gateway is running');
+})
+
+server.start(4000).then(() => {
+    console.log('API gateway started at port 4000')
+})
